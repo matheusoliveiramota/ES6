@@ -8,9 +8,25 @@ class NegociacaoController {
         this._inputQuantidade = $('#quantidade');
         this._inputValor = $('#valor');
 
-        this._listaNegociacoes = new ListaNegociacoes(() => {
-            this._negociacoesView.update(this._listaNegociacoes);
-            this._mensagemView.update(this._mensagem);
+        let self = this;
+        this._listaNegociacoes = new Proxy(new ListaNegociacoes(), {
+            
+            get(target, prop, receiver) {
+                
+                if(['exclui', 'adiciona'].includes(prop) && typeof(target[prop]) == 'function') {
+                    
+                    return function() {
+
+                        Reflect.apply(target[prop],target,arguments);
+                        self._negociacoesView.update(self._listaNegociacoes);
+                        self._mensagemView.update(self._mensagem);
+                    }
+                }
+
+                else {
+                    return target[prop];
+                }
+            }
         });
 
         this._negociacoesView = new NegociacoesView($('#negociacoes'));
@@ -18,6 +34,8 @@ class NegociacaoController {
         this._mensagem = new Mensagem();
         this._mensagemView = new MensagemView($('#mensagemView'));
         
+        self._negociacoesView.update(self._listaNegociacoes);
+        self._mensagemView.update(self._mensagem);
     }
 
     adiciona(event){
@@ -31,7 +49,7 @@ class NegociacaoController {
 
     exclui() {
 
-        this._mensagem.texto = 'Negociações exluídas com sucesso!';
+        this._mensagem.texto = 'Negociações excluídas com sucesso!';
         this._listaNegociacoes.exclui();
     }
 

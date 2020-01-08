@@ -21,8 +21,7 @@ class NegociacoesView extends View{
                                 <td>${item.quantidade}</td>
                                 <td>${item.valor}</td>
                                 <td>${item.volume}</td>
-                           </tr>
-                          `  
+                           </tr>`  
                         )
                     }
                 <tfoot>
