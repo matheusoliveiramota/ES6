@@ -14,10 +14,11 @@ class NegociacaoController {
         });
 
         this._negociacoesView = new NegociacoesView($('#negociacoes'));
+        this._negociacoesView.update(this._listaNegociacoes);
 
         this._mensagem = new Mensagem();
         this._mensagemView = new MensagemView($('#mensagemView'));
-        
+        this._mensagemView.update(this._mensagem);
     }
 
     adiciona(event){

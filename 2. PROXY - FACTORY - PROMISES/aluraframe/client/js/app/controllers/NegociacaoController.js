@@ -8,34 +8,16 @@ class NegociacaoController {
         this._inputQuantidade = $('#quantidade');
         this._inputValor = $('#valor');
 
-        let self = this;
-        this._listaNegociacoes = new Proxy(new ListaNegociacoes(), {
-            
-            get(target, prop, receiver) {
-                
-                if(['exclui', 'adiciona'].includes(prop) && typeof(target[prop]) == 'function') {
-                    
-                    return function() {
-
-                        Reflect.apply(target[prop],target,arguments);
-                        self._negociacoesView.update(self._listaNegociacoes);
-                        self._mensagemView.update(self._mensagem);
-                    }
-                }
-
-                else {
-                    return target[prop];
-                }
-            }
-        });
-
         this._negociacoesView = new NegociacoesView($('#negociacoes'));
-
+        this._listaNegociacoes = ProxyFactory.create(new ListaNegociacoes()
+                                                        ,['exclui', 'adiciona']
+                                                        ,(model) => this._negociacoesView.update(model));
+        
         this._mensagem = new Mensagem();
         this._mensagemView = new MensagemView($('#mensagemView'));
         
-        self._negociacoesView.update(self._listaNegociacoes);
-        self._mensagemView.update(self._mensagem);
+        this._negociacoesView.update(this._listaNegociacoes);
+        this._mensagemView.update(this._mensagem);
     }
 
     adiciona(event){
