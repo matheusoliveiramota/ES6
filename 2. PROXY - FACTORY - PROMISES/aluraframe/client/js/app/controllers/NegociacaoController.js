@@ -8,31 +8,47 @@ class NegociacaoController {
         this._inputQuantidade = $('#quantidade');
         this._inputValor = $('#valor');
 
-        this._negociacoesView = new NegociacoesView($('#negociacoes'));
-        this._listaNegociacoes = ProxyFactory.create(new ListaNegociacoes()
-                                                        ,['exclui', 'adiciona']
-                                                        ,(model) => this._negociacoesView.update(model));
+        this._listaNegociacoes = new Bind( new ListaNegociacoes()
+                                          ,new NegociacoesView($('#negociacoes'))
+                                          ,'exclui', 'adiciona');
+
         
-        this._mensagem = new Mensagem();
-        this._mensagemView = new MensagemView($('#mensagemView'));
-        
-        this._negociacoesView.update(this._listaNegociacoes);
-        this._mensagemView.update(this._mensagem);
+        this._mensagem = new Bind( new Mensagem()
+                                  ,new MensagemView($('#mensagemView'))
+                                  ,'texto');
     }
 
     adiciona(event){
         
         event.preventDefault();
 
-        this._mensagem.texto = 'Nova negociação cadastrada com sucesso!';
-        this._criarNegociacao();
+        this._listaNegociacoes.adiciona(this._criarNegociacao());
         this._limparFormulario();
+        this._mensagem.texto = 'Nova negociação cadastrada com sucesso!';
     }
 
     exclui() {
 
-        this._mensagem.texto = 'Negociações excluídas com sucesso!';
         this._listaNegociacoes.exclui();
+        this._mensagem.texto = 'Negociações excluídas com sucesso!';
+    }
+
+    importaNegociacoes() {
+        
+        let negociacaoService = new NegociacaoService();
+
+        negociacaoService.importaNegociacoes((erro,dados) => {
+            
+            if(erro) {
+                this._mensagem.texto = erro;
+                return;
+            }
+            else {
+                dados.forEach(negociacao => this._listaNegociacoes.adiciona(negociacao));
+                this._mensagem.texto = "Negociações importadas com sucesso!";
+            }
+
+        });
     }
 
     _limparFormulario() {
@@ -46,12 +62,10 @@ class NegociacaoController {
 
     _criarNegociacao() {
         
-        let negociacao = new Negociacao(
+        return new Negociacao(
             DateHelper.textoParaData(this._inputData.value),
             this._inputQuantidade.value,
             this._inputValor.value
         );
-
-        this._listaNegociacoes.adiciona(negociacao);
     }
 }
