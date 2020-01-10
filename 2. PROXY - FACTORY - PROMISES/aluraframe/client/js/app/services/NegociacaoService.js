@@ -1,35 +1,60 @@
 class NegociacaoService {
+
+    constructor() {
+
+        this._http = new HttpService();
+    }
     
-     importaNegociacoes(clb) {
+    importaNegociacoesSemana() {
+
+        return this._http.get('http://localhost:3000/negociacoes/semana')
+                        .then(negociacoes => {
+
+                            return negociacoes.map(objeto => new Negociacao(new Date(objeto.data),objeto.quantidade,objeto.valor))
+                        })
+                        .catch(erro => {
+                                console.log(erro);
+                                throw new Error('Erro ao buscar as negociações da semana!');
+                        });
+    }
+
+    importaNegociacoesSemanaPassada() {
        
-        let xhr = new XMLHttpRequest();
-        xhr.open('GET', 'http://localhost:3000/negociacoes/semana');
+        return this._http.get('http://localhost:3000/negociacoes/anterior')
+                        .then(negociacoes => {
+                              
+                            return negociacoes.map(objeto => new Negociacao(new Date(objeto.data),objeto.quantidade,objeto.valor))
+                        })
+                        .catch(erro => {       
+                            console.log(erro);
+                            throw new Error('Erro ao buscar as negociações da semana passada!');
+                        });
+    }
 
-        xhr.onreadystatechange = () => {
-            
-            /*  readyState = 
-                    0: requisição ainda não iniciada
-                    1: conexão com o servidor estabelecida
-                    2: requisição recebida
-                    3: processando requisição
-                    4: requisição está concluída e a resposta está pronta */
+    importaNegociacoesSemanaRetrasada() {
+       
+        return this._http.get('http://localhost:3000/negociacoes/retrasada')
+                        .then(negociacoes => {
+                                            
+                            return negociacoes.map(objeto => new Negociacao(new Date(objeto.data),objeto.quantidade,objeto.valor))
+                        })
+                        .catch(erro => {                     
+                            console.log(erro);
+                            throw new Error('Erro ao buscar as negociações da semana retrasada!');
+                        });
+    }
 
-            if(xhr.readyState == 4) {
-                
-                if(xhr.status == 200) {
+    importaNegociacoes() {
 
-                    let dados = JSON.parse(xhr.responseText)
-                                    .map(objeto => new Negociacao(new Date(objeto.data),objeto.quantidade,objeto.valor));
-                    clb(null, dados);
-                }
-                else {
-                    
-                    console.log(xhr.responseText);
-                    clb('Erro na requisição!')
-                }
-            }
-        }
+        return Promise.all(
+                [this.importaNegociacoesSemana(),
+                this.importaNegociacoesSemanaPassada(),
+                this.importaNegociacoesSemanaRetrasada()]
+            ).then((listaNegociacoes) => {
 
-        xhr.send();
+                let negociacoes = listaNegociacoes.reduce((negociacoes, negociacao) => negociacoes.concat(negociacao), []);
+                return negociacoes;
+            })
+            .catch(erro => { throw erro; });
     }
 }
