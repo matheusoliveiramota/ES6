@@ -22,7 +22,7 @@ class ProxyFactory {
             set(target, prop, value, receiver) {
                 
                 let retorno =  Reflect.set(target, prop, value, receiver);
-                if(props.includes(prop)) 
+                if(props.includes(prop))
                     acao(target);                
                 
                 return retorno;

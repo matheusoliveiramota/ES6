@@ -10,12 +10,14 @@ class NegociacaoController {
 
         this._listaNegociacoes = new Bind( new ListaNegociacoes()
                                           ,new NegociacoesView($('#negociacoes'))
-                                          ,'exclui', 'adiciona');
+                                          ,'exclui', 'adiciona','ordena','inverteOrdem');
 
         
         this._mensagem = new Bind( new Mensagem()
                                   ,new MensagemView($('#mensagemView'))
                                   ,'texto');
+
+        this._ordenaCampo = '';
     }
 
     adiciona(event){
@@ -44,6 +46,20 @@ class NegociacaoController {
             this._mensagem.texto = "Negociações importadas com sucesso !"
         })
         .catch(erro => this._mensagem.texto = erro.message);
+    }
+
+    ordena(coluna)
+    {
+        if(this._ordenaCampo == coluna) {
+            // Inverte a ordem
+            this._listaNegociacoes.inverteOrdem();
+        }
+        else {
+            // Ordena por outro coluna
+            this._listaNegociacoes.ordena((a,b) => a[coluna] - b[coluna]);
+        }
+
+        this._ordenaCampo = coluna;
     }
 
     _limparFormulario() {
